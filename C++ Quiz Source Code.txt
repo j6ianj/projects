@@ -1,0 +1,97 @@
+#include <iostream>
+#include <string>
+#include <cctype>
+#include <fstream>
+#include <chrono>
+#include <thread>
+using namespace std;
+
+bool Validate_ID(string id) {
+    // Implement validation logic here
+    return true;
+}
+
+int main() {
+    // Arrays for questions and answers
+    const int Num_Questions = 10;
+    string Q[Num_Questions];
+    string A[Num_Questions];
+    string first_name, last_name, id;
+    int attempts = 0;
+    bool valid_id = false;
+
+    // Prompt for name and ID
+    cout << "Enter your first name: ";
+    cin >> first_name;
+    cout << "Enter your last name: ";
+    cin >> last_name;
+
+    // Loop until valid ID is entered or 3 attempts are made
+    while (!valid_id && attempts < 3) {
+        cout << "Please enter your ID (starts with A followed by 5 numbers): ";
+        cin >> id;
+
+        valid_id = Validate_ID(id);
+
+        if (!valid_id) {
+            cout << "Invalid ID, please try again." << endl;
+            attempts++;
+        }
+    }
+
+    // Exit program if 3 failed attempts were made
+    if (attempts == 3) {
+        cout << "Too many failed attempts, exiting program." << endl;
+        return 0;
+    }
+
+    // Display the questions and the answers 
+    ifstream questionFile, answerFile;
+    questionFile.open("TestBank.txt");
+    answerFile.open("A_Array.txt");
+    if (!questionFile || !answerFile) {
+        cout << "Error: Failed to open question or answer file." << endl;
+        return 0;
+    }
+    for (int i = 0; i < Num_Questions; i++) {
+        getline(questionFile, Q[i]);
+        getline(answerFile, A[i]);
+    }
+    questionFile.close();
+    answerFile.close();
+
+    // Display one question at a time with a time limit of 10 minutes
+    const int time_limit = 600;  // 10 minutes in seconds
+    int time_elapsed = 0;
+    int correct_count = 0;
+    for (int i = 0; i < Num_Questions; i++) {
+        cout << "Question " << i + 1 << ": " << Q[i] << endl;
+        string answer;
+        cout << "Your answer: ";
+        cin >> answer;
+
+        // Check if the answer is correct
+        if (answer == A[i]) {
+            cout << "Correct!" << endl;
+            correct_count++;
+        }
+        else {
+            cout << "Incorrect." << endl;
+        }
+
+        // Check if the time limit has been reached
+        time_elapsed += 30;  // Assume each question takes 30 seconds
+        if (time_elapsed >= time_limit) {
+            cout << "Time limit reached. Exiting program." << endl;
+            return 0;
+        }
+
+        // Wait for 1 second before displaying the next question
+        this_thread::sleep_for(chrono::seconds(1));
+    }
+
+    // Display final score
+    cout << "You answered " << correct_count << " out of " << Num_Questions << " questions correctly." << endl;
+
+    return 0;
+}
